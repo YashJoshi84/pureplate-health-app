@@ -34,7 +34,13 @@ const ProtectedRoute = ({ children }) => {
 
 const PublicOnlyRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-slate-50">
+        <div className="w-12 h-12 border-4 border-emerald-100 border-t-emerald-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
   // Redirect logged in users away from Marketing/Auth pages
   if (user) return <Navigate to="/dashboard" replace />;
   return children;
