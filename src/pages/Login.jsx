@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { ShieldAlert, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const { login } = useAuth();
+  const navigate = useNavigate();
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
@@ -17,6 +19,7 @@ export default function Login() {
     
     try {
       await login(email, password);
+      navigate('/dashboard'); // Explicit redirect immediately after success
     } catch (err) {
       setError(err.message || "Failed to sign in. Please check your credentials.");
       setIsLoading(false);
@@ -24,7 +27,7 @@ export default function Login() {
   };
 
   return (
-    <div>
+    <div className="w-full">
       <h2 className="text-2xl font-bold text-slate-900 mb-6 text-center tracking-tight">Log in to your account</h2>
       
       {error && (
