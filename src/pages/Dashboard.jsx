@@ -7,97 +7,121 @@ import {
   Coffee, UtensilsCrossed, Flame
 } from 'lucide-react';
 
+// ------------------------------------
+// NUTRITION DATABASE MAPPING
+// ------------------------------------
 const NUTRITION_DB = {
-  "Avocado Toast & Poached Eggs": { calories: 420, protein: 22, carbs: 28, fats: 21 },
-  "Grilled Chicken Quinoa Bowl": { calories: 510, protein: 42, carbs: 35, fats: 16 },
-  "Baked Salmon & Asparagus": { calories: 480, protein: 38, carbs: 12, fats: 26 },
-  "Greek Yogurt & Berries": { calories: 250, protein: 18, carbs: 24, fats: 5 },
-  "Turkey Salad Wrap": { calories: 380, protein: 28, carbs: 32, fats: 14 },
-  "Lentil Soup": { calories: 320, protein: 18, carbs: 45, fats: 4 },
-  "Oatmeal with Almonds": { calories: 360, protein: 14, carbs: 40, fats: 12 },
-  "Leftover Lentil Soup": { calories: 320, protein: 18, carbs: 45, fats: 4 },
-  "Zucchini Noodles with Pesto": { calories: 280, protein: 8, carbs: 14, fats: 22 },
-  "Green Smoothie": { calories: 210, protein: 5, carbs: 42, fats: 3 },
-  "Chickpea Salad": { calories: 410, protein: 16, carbs: 48, fats: 18 },
-  "Lean Steak with Sweet Potatoes": { calories: 560, protein: 46, carbs: 40, fats: 22 },
-  "Protein Pancakes": { calories: 380, protein: 32, carbs: 36, fats: 10 },
-  "Chicken Caesars Salad": { calories: 450, protein: 35, carbs: 15, fats: 28 },
-  "Healthy Tacos": { calories: 490, protein: 30, carbs: 45, fats: 18 },
-  "Scrambled Eggs": { calories: 280, protein: 20, carbs: 4, fats: 20 },
-  "Tuna Salad Sandwiches": { calories: 420, protein: 32, carbs: 36, fats: 14 },
-  "Homemade Cauliflower Pizza": { calories: 520, protein: 24, carbs: 30, fats: 28 },
-  "Chia Seed Pudding": { calories: 290, protein: 10, carbs: 25, fats: 16 },
-  "Roast Chicken": { calories: 460, protein: 42, carbs: 0, fats: 25 },
-  "Meal Prep: Rice Bowls": { calories: 500, protein: 35, carbs: 55, fats: 12 }
+  "Avocado Toast & Poached Eggs": { calories: 420, protein: 22, carbs: 28, fat: 21 },
+  "Grilled Chicken Quinoa Bowl": { calories: 510, protein: 42, carbs: 35, fat: 16 },
+  "Oatmeal with Almonds": { calories: 360, protein: 14, carbs: 40, fat: 12 },
+  "Salmon & Asparagus": { calories: 480, protein: 39, carbs: 12, fat: 24 },
+  "Baked Salmon & Asparagus": { calories: 480, protein: 38, carbs: 12, fat: 26 },
+  "Greek Yogurt & Berries": { calories: 250, protein: 18, carbs: 24, fat: 5 },
+  "Turkey Salad Wrap": { calories: 380, protein: 28, carbs: 32, fat: 14 },
+  "Lentil Soup": { calories: 320, protein: 18, carbs: 45, fat: 4 },
+  "Leftover Lentil Soup": { calories: 320, protein: 18, carbs: 45, fat: 4 },
+  "Zucchini Noodles with Pesto": { calories: 280, protein: 8, carbs: 14, fat: 22 },
+  "Green Smoothie": { calories: 210, protein: 5, carbs: 42, fat: 3 },
+  "Chickpea Salad": { calories: 410, protein: 16, carbs: 48, fat: 18 },
+  "Lean Steak with Sweet Potatoes": { calories: 560, protein: 46, carbs: 40, fat: 22 },
+  "Protein Pancakes": { calories: 380, protein: 32, carbs: 36, fat: 10 },
+  "Chicken Caesars Salad": { calories: 450, protein: 35, carbs: 15, fat: 28 },
+  "Healthy Tacos": { calories: 490, protein: 30, carbs: 45, fat: 18 },
+  "Scrambled Eggs": { calories: 280, protein: 20, carbs: 4, fat: 20 },
+  "Tuna Salad Sandwiches": { calories: 420, protein: 32, carbs: 36, fat: 14 },
+  "Homemade Cauliflower Pizza": { calories: 520, protein: 24, carbs: 30, fat: 28 },
+  "Chia Seed Pudding": { calories: 290, protein: 10, carbs: 25, fat: 16 },
+  "Roast Chicken": { calories: 460, protein: 42, carbs: 0, fat: 25 },
+  "Meal Prep: Rice Bowls": { calories: 500, protein: 35, carbs: 55, fat: 12 }
 };
 
-const DEFAULT_MACROS = { calories: 400, protein: 25, carbs: 40, fats: 15 };
+const DEFAULT_MACROS = { calories: 400, protein: 25, carbs: 40, fat: 15 };
 
-export default function Dashboard() {
-  const { user } = useAuth();
+// ------------------------------------
+// SCALABLE DATA FETCHING HOOK
+// ------------------------------------
+// This architecture allows easily swapping localStorage with a real API later.
+function useDashboardData() {
   const [isLoading, setIsLoading] = useState(true);
-  
   const [todayMeals, setTodayMeals] = useState({});
-  const [totals, setTotals] = useState({ calories: 0, protein: 0, carbs: 0, fats: 0 });
+  const [totals, setTotals] = useState({ calories: 0, protein: 0, carbs: 0, fat: 0 });
   const [stats, setStats] = useState({ todayPlanned: 0, weeklyPlanned: 0, groceries: 0 });
   const [completed, setCompleted] = useState({ Breakfast: false, Lunch: false, Dinner: false });
 
   const currentDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
   useEffect(() => {
-    // Artificial load to emphasize dashboard compilation
-    const timer = setTimeout(() => {
-      
-      const savedPlanner = localStorage.getItem('pureplate_planner');
-      const parsedPlan = savedPlanner ? JSON.parse(savedPlanner) : {};
-      
-      // Calculate overall metrics
-      let totalWeekly = 0;
-      Object.keys(parsedPlan).forEach(day => {
-        if(parsedPlan[day].Breakfast) totalWeekly++;
-        if(parsedPlan[day].Lunch) totalWeekly++;
-        if(parsedPlan[day].Dinner) totalWeekly++;
-      });
+    // Simulate API fetch delay
+    const fetchDashboardData = async () => {
+      setIsLoading(true);
+      try {
+        // In the future, replace this block with an API call:
+        // const response = await fetch('/api/dashboard/today');
+        // const data = await response.json();
+        
+        await new Promise(resolve => setTimeout(resolve, 600));
 
-      // Todays specifics
-      const todaysData = parsedPlan[currentDay] || { Breakfast: "", Lunch: "", Dinner: "" };
-      let todayCount = 0;
-      if (todaysData.Breakfast) todayCount++;
-      if (todaysData.Lunch) todayCount++;
-      if (todaysData.Dinner) todayCount++;
+        const savedPlanner = localStorage.getItem('pureplate_planner');
+        const parsedPlan = savedPlanner ? JSON.parse(savedPlanner) : {};
+        
+        let totalWeekly = 0;
+        Object.keys(parsedPlan).forEach(day => {
+          if(parsedPlan[day].Breakfast) totalWeekly++;
+          if(parsedPlan[day].Lunch) totalWeekly++;
+          if(parsedPlan[day].Dinner) totalWeekly++;
+        });
 
-      // Compute macros
-      const calcTotals = { calories: 0, protein: 0, carbs: 0, fats: 0 };
-      
-      ['Breakfast', 'Lunch', 'Dinner'].forEach(slot => {
-        const mealName = todaysData[slot]?.trim();
-        if (mealName) {
-           const info = NUTRITION_DB[mealName] || DEFAULT_MACROS;
-           calcTotals.calories += info.calories;
-           calcTotals.protein += info.protein;
-           calcTotals.carbs += info.carbs;
-           calcTotals.fats += info.fats;
-        }
-      });
+        const todaysData = parsedPlan[currentDay] || { Breakfast: "", Lunch: "", Dinner: "" };
+        let todayCount = 0;
+        if (todaysData.Breakfast) todayCount++;
+        if (todaysData.Lunch) todayCount++;
+        if (todaysData.Dinner) todayCount++;
 
-      setTodayMeals(todaysData);
-      setTotals(calcTotals);
-      setStats({
-         todayPlanned: todayCount,
-         weeklyPlanned: totalWeekly,
-         groceries: totalWeekly * 4 // Example multiplier estimating grocery line-items
-      });
+        const calcTotals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        
+        ['Breakfast', 'Lunch', 'Dinner'].forEach(slot => {
+          const mealName = todaysData[slot]?.trim();
+          if (mealName) {
+             const info = NUTRITION_DB[mealName] || DEFAULT_MACROS;
+             calcTotals.calories += info.calories;
+             calcTotals.protein += info.protein;
+             calcTotals.carbs += info.carbs;
+             calcTotals.fat += info.fat;
+          }
+        });
 
-      setIsLoading(false);
-    }, 600);
+        setTodayMeals(todaysData);
+        setTotals(calcTotals);
+        setStats({
+           todayPlanned: todayCount,
+           weeklyPlanned: totalWeekly,
+           groceries: totalWeekly * 4 
+        });
 
-    return () => clearTimeout(timer);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
   }, [currentDay]);
 
   const toggleComplete = (meal) => {
     setCompleted(prev => ({ ...prev, [meal]: !prev[meal] }));
   };
 
+  return { isLoading, todayMeals, totals, stats, completed, toggleComplete, currentDay };
+}
+
+// ------------------------------------
+// DASHBOARD COMPONENT
+// ------------------------------------
+export default function Dashboard() {
+  const { user } = useAuth();
+  const { isLoading, todayMeals, totals, stats, completed, toggleComplete, currentDay } = useDashboardData();
+  
   const firstName = user?.user_metadata?.full_name?.split(' ')[0];
   const greeting = firstName ? `Good morning, ${firstName}` : "Welcome back";
 
@@ -126,7 +150,7 @@ export default function Dashboard() {
         <StatCard icon={<Flame/>} label="Streak" value="12 Days" trend="Keep going!" bgColor="bg-orange-500/10" textColor="text-orange-600" />
         <StatCard icon={<CalendarDays/>} label="Today's Plan" value={`${stats.todayPlanned}/3`} trend="Meals locked in" bgColor="bg-emerald-500/10" textColor="text-emerald-600" />
         <StatCard icon={<Activity/>} label="Weekly Plan" value={`${stats.weeklyPlanned}/21`} trend="Total meals prepped" bgColor="bg-blue-500/10" textColor="text-blue-600" />
-        <StatCard icon={<ShoppingCart/>} label="Grocery List" value={`${stats.groceries}`} trend="Pending line items" bgColor="bg-indigo-500/10" textColor="text-indigo-600" />
+        <StatCard icon={<ShoppingCart/>} label="Grocery List" value={`${stats.groceries}`} trend="Estimated items" bgColor="bg-indigo-500/10" textColor="text-indigo-600" />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -207,7 +231,7 @@ export default function Dashboard() {
                   <ProgressBar label="Calories" current={totals.calories} max={2200} unit=" kcal" color="bg-orange-500" />
                   <ProgressBar label="Protein" current={totals.protein} max={140} unit="g" color="bg-emerald-500" />
                   <ProgressBar label="Carbs" current={totals.carbs} max={250} unit="g" color="bg-blue-500" />
-                  <ProgressBar label="Fats" current={totals.fats} max={70} unit="g" color="bg-amber-500" />
+                  <ProgressBar label="Fat" current={totals.fat} max={70} unit="g" color="bg-amber-500" />
                </div>
              ) : (
                 <div className="text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200 relative z-10">
