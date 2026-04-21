@@ -1,12 +1,12 @@
 <div align="center">
-  <img src="./public/logo.png" alt="PurePlate" width="120" />
+  <!-- <img src="./public/logo.png" alt="PurePlate" width="120" /> -->
   <h1>PurePlate</h1>
   <p><strong>The intelligent, connected ecosystem for modern nutrition and meal planning.</strong></p>
   <p>
     <a href="#the-connected-workflow">Workflow</a> • 
     <a href="#how-to-evaluate">For Judges</a> • 
     <a href="#technical-decisions">Architecture</a> • 
-    <a href="#setup-instructions">Setup</a>
+    
   </p>
 </div>
 
