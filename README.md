@@ -1,6 +1,9 @@
 <div align="center">
   <!-- <img src="./public/logo.png" alt="PurePlate" width="120" /> -->
   <h1>PurePlate</h1>
+  <p>
+  <a href="https://pureplate-health-app.vercel.app" target="_blank"><strong>🌐 Live App</strong></a>
+  </p>
   <p><strong>The intelligent, connected ecosystem for modern nutrition and meal planning.</strong></p>
   <p>
     <a href="#the-connected-workflow">Workflow</a> • 
